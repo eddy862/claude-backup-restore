@@ -40,10 +40,13 @@ after install regenerates a valid entry, so it's not worth tracking.
 
 - **New device**: clone the repo, run `scripts/install.ps1`, start `claude`
   once, run `/plugin marketplace add <repo>` for each marketplace you use
-  (e.g. `anthropics/claude-plugins-official`) so it fetches the enabled
-  plugins, then log back into the claude.ai connectors (ArkWiki, Atlassian,
-  Linear, etc.) — those are OAuth/account-linked, not files, so this repo
-  can't restore them.
+  (e.g. `anthropics/claude-plugins-official`), then run `/reload-plugins` --
+  restoring `enabledPlugins` in `settings.json` isn't enough on its own to
+  install them; `/reload-plugins` is what resolves each enabled plugin
+  against the marketplace and populates its cache (without it you'll see
+  per-plugin "no cache" errors). Finally log back into the claude.ai
+  connectors (ArkWiki, Atlassian, Linear, etc.) — those are OAuth/
+  account-linked, not files, so this repo can't restore them.
 - **After changing config on a machine** (enabling a plugin, adding an MCP
   server, adding a custom skill/agent/command): run `scripts/backup.ps1`,
   review the diff, then commit and push.

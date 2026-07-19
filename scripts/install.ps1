@@ -79,5 +79,6 @@ if ($node) {
 }
 
 Write-Host "`nDone. Next steps:"
-Write-Host "  - Start 'claude' once, then run '/plugin marketplace add anthropics/claude-plugins-official' (or whichever marketplaces you use) so it can fetch/install the enabled plugins."
+Write-Host "  - Start 'claude' once, then run '/plugin marketplace add anthropics/claude-plugins-official' (or whichever marketplaces you use)."
+Write-Host "  - Run '/reload-plugins' -- enabledPlugins alone doesn't install anything; this resolves each enabled plugin against the marketplace and populates its cache. Skipping it shows per-plugin 'no cache' errors."
 Write-Host "  - Log back into any claude.ai connectors (ArkWiki, Atlassian, Linear, etc.) -- those are account-linked, not file-based, so they aren't restored by this script."

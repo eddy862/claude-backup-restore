@@ -11,7 +11,6 @@ See [CLAUDE.md](./CLAUDE.md) for what's tracked here and why.
 ```
 claude/
   settings.json                    -> ~/.claude/settings.json (enabledPlugins, theme, autoUpdatesChannel)
-  plugins/known_marketplaces.json  -> ~/.claude/plugins/known_marketplaces.json
   mcp-servers.json                 -> merged into the "mcpServers" key of ~/.claude.json
   skills/<name>/SKILL.md           -> ~/.claude/skills/<name>/SKILL.md (custom user-level skills)
   agents/                          -> ~/.claude/agents (custom user-level subagents; empty for now)
@@ -25,8 +24,9 @@ README.md                 this file
 ```
 
 Anything not listed above (`.credentials.json`, `history.jsonl`, `cache/`,
-`projects/`, `sessions/`, plugin install caches, etc.) is machine/account
-state and is intentionally not tracked here.
+`projects/`, `sessions/`, plugin install caches,
+`plugins/known_marketplaces.json`, etc.) is machine/account state and is
+intentionally not tracked here.
 
 ## Restore on a new device
 
@@ -54,18 +54,22 @@ state and is intentionally not tracked here.
    The script prints each item as it restores it, e.g.:
 
    ```
-   [1/4] settings.json
+   [1/3] settings.json
      plugin 'github@claude-plugins-official' enabled
      ...
-   [3/4] custom skills / agents / commands
+   [2/3] custom skills / agents / commands
      skill 'learn-by-building' installed
-   [4/4] MCP servers (merging into ~/.claude.json)
+   [3/3] MCP servers (merging into ~/.claude.json)
      mcp server 'Jam' installed
    ```
 
-Then start `claude` once (so it installs the enabled plugins) and log back
-into any claude.ai connectors you use — those are account-linked, not
-restored by this repo.
+Then start `claude` once, run `/plugin marketplace add <repo>` for each
+marketplace you use (e.g. `anthropics/claude-plugins-official`), and run
+`/reload-plugins` — `enabledPlugins` alone doesn't install anything;
+`/reload-plugins` resolves each enabled plugin against the marketplace and
+populates its cache (skipping it shows per-plugin "no cache" errors).
+Finally, log back into any claude.ai connectors you use — those are
+account-linked, not restored by this repo.
 
 ## Save changes from this device
 
