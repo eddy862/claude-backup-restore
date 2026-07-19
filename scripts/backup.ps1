@@ -23,12 +23,24 @@ $claudeJsonPath = Join-Path $env:USERPROFILE ".claude.json"
 Write-Host "Pulling Claude Code config from $claudeDir into the repo ..."
 
 Write-Host "`n[1/4] settings.json"
-Copy-Item (Join-Path $claudeDir "settings.json") (Join-Path $repoClaudeDir "settings.json") -Force
+$settingsDest = Join-Path $repoClaudeDir "settings.json"
+Copy-Item (Join-Path $claudeDir "settings.json") $settingsDest -Force
+$settings = Get-Content $settingsDest -Raw | ConvertFrom-Json
+foreach ($plugin in $settings.enabledPlugins.PSObject.Properties) {
+    if ($plugin.Value) {
+        Write-Host "  plugin '$($plugin.Name)' backed up"
+    }
+}
 
 Write-Host "`n[2/4] plugin marketplaces"
 $marketplacesSrc = Join-Path $claudeDir "plugins\known_marketplaces.json"
 if (Test-Path $marketplacesSrc) {
-    Copy-Item $marketplacesSrc (Join-Path $repoClaudeDir "plugins\known_marketplaces.json") -Force
+    $marketplacesDest = Join-Path $repoClaudeDir "plugins\known_marketplaces.json"
+    Copy-Item $marketplacesSrc $marketplacesDest -Force
+    $marketplaces = Get-Content $marketplacesDest -Raw | ConvertFrom-Json
+    foreach ($marketplace in $marketplaces.PSObject.Properties) {
+        Write-Host "  marketplace '$($marketplace.Name)' backed up"
+    }
 }
 
 Write-Host "`n[3/4] custom skills / agents / commands"
@@ -36,11 +48,20 @@ foreach ($kind in @("skills", "agents", "commands")) {
     $src = Join-Path $claudeDir $kind
     $dest = Join-Path $repoClaudeDir $kind
     if (Test-Path $src) {
-        New-Item -ItemType Directory -Force -Path $dest | Out-Null
-        Copy-Item (Join-Path $src "*") $dest -Recurse -Force
-        Write-Host "  Copied $kind"
+        $items = Get-ChildItem $src -Force
+        if ($items) {
+            New-Item -ItemType Directory -Force -Path $dest | Out-Null
+            $label = $kind.Substring(0, $kind.Length - 1)
+            foreach ($item in $items) {
+                Copy-Item $item.FullName $dest -Recurse -Force
+                $name = [System.IO.Path]::GetFileNameWithoutExtension($item.Name)
+                Write-Host "  $label '$name' backed up"
+            }
+        } else {
+            Write-Host "  no $kind on this machine"
+        }
     } else {
-        Write-Host "  Skipped $kind (none on this machine)"
+        Write-Host "  no $kind on this machine"
     }
 }
 

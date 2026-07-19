@@ -13,7 +13,7 @@ claude/
   settings.json                    -> ~/.claude/settings.json (enabledPlugins, theme, autoUpdatesChannel)
   plugins/known_marketplaces.json  -> ~/.claude/plugins/known_marketplaces.json
   mcp-servers.json                 -> merged into the "mcpServers" key of ~/.claude.json
-  skills/                          -> ~/.claude/skills (custom user-level skills; empty for now)
+  skills/<name>/SKILL.md           -> ~/.claude/skills/<name>/SKILL.md (custom user-level skills)
   agents/                          -> ~/.claude/agents (custom user-level subagents; empty for now)
   commands/                        -> ~/.claude/commands (custom slash commands; empty for now)
 scripts/
@@ -41,7 +41,26 @@ state and is intentionally not tracked here.
    ```powershell
    git clone <this-repo-url>
    cd claude-config
-   .\scripts\install.ps1
+   powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
+   ```
+
+   Windows blocks unsigned local scripts by default (`running scripts is
+   disabled on this system`), so `-ExecutionPolicy Bypass` is needed to run
+   `install.ps1`/`backup.ps1` — it only affects that one invocation, no
+   system setting is changed. If you'd rather not type it every time, run
+   `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
+   once instead, then call the scripts directly (`.\scripts\install.ps1`).
+
+   The script prints each item as it restores it, e.g.:
+
+   ```
+   [1/4] settings.json
+     plugin 'github@claude-plugins-official' enabled
+     ...
+   [3/4] custom skills / agents / commands
+     skill 'learn-by-building' installed
+   [4/4] MCP servers (merging into ~/.claude.json)
+     mcp server 'Jam' installed
    ```
 
 Then start `claude` once (so it installs the enabled plugins) and log back
@@ -51,7 +70,7 @@ restored by this repo.
 ## Save changes from this device
 
 ```powershell
-.\scripts\backup.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\backup.ps1
 git diff        # review before committing
 git add -A
 git commit -m "..."

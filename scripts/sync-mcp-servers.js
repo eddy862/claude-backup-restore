@@ -27,12 +27,16 @@ if (mode === "import") {
   const repoMcp = readJson(repoMcpPath, {});
   claudeJson.mcpServers = { ...(claudeJson.mcpServers || {}), ...repoMcp };
   fs.writeFileSync(claudeJsonPath, JSON.stringify(claudeJson, null, 2));
-  console.log(`Imported ${Object.keys(repoMcp).length} MCP server(s) into ${claudeJsonPath}`);
+  const names = Object.keys(repoMcp);
+  if (names.length === 0) console.log("  no MCP servers in repo yet");
+  names.forEach((n) => console.log(`  mcp server '${n}' installed`));
 } else if (mode === "export") {
   const claudeJson = readJson(claudeJsonPath, {});
   const mcpServers = claudeJson.mcpServers || {};
   fs.writeFileSync(repoMcpPath, JSON.stringify(mcpServers, null, 2) + "\n");
-  console.log(`Exported ${Object.keys(mcpServers).length} MCP server(s) to ${repoMcpPath}`);
+  const names = Object.keys(mcpServers);
+  if (names.length === 0) console.log("  no MCP servers on this machine");
+  names.forEach((n) => console.log(`  mcp server '${n}' backed up`));
 } else {
   console.error(`Unknown mode "${mode}", expected "import" or "export"`);
   process.exit(1);

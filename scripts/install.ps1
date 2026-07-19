@@ -36,6 +36,12 @@ Write-Host "`n[1/4] settings.json"
 $settingsDest = Join-Path $claudeDir "settings.json"
 Backup-IfExists $settingsDest
 Copy-Item (Join-Path $repoClaudeDir "settings.json") $settingsDest -Force
+$settings = Get-Content $settingsDest -Raw | ConvertFrom-Json
+foreach ($plugin in $settings.enabledPlugins.PSObject.Properties) {
+    if ($plugin.Value) {
+        Write-Host "  plugin '$($plugin.Name)' enabled"
+    }
+}
 
 Write-Host "`n[2/4] plugin marketplaces"
 $pluginsDir = Join-Path $claudeDir "plugins"
@@ -43,18 +49,26 @@ New-Item -ItemType Directory -Force -Path $pluginsDir | Out-Null
 $marketplacesDest = Join-Path $pluginsDir "known_marketplaces.json"
 Backup-IfExists $marketplacesDest
 Copy-Item (Join-Path $repoClaudeDir "plugins\known_marketplaces.json") $marketplacesDest -Force
+$marketplaces = Get-Content $marketplacesDest -Raw | ConvertFrom-Json
+foreach ($marketplace in $marketplaces.PSObject.Properties) {
+    Write-Host "  marketplace '$($marketplace.Name)' registered"
+}
 
 Write-Host "`n[3/4] custom skills / agents / commands"
 foreach ($kind in @("skills", "agents", "commands")) {
     $src = Join-Path $repoClaudeDir $kind
     $dest = Join-Path $claudeDir $kind
-    $hasContent = Get-ChildItem $src -Force | Where-Object { $_.Name -ne ".gitkeep" }
-    if ($hasContent) {
+    $items = Get-ChildItem $src -Force | Where-Object { $_.Name -ne ".gitkeep" }
+    if ($items) {
         New-Item -ItemType Directory -Force -Path $dest | Out-Null
-        Copy-Item (Join-Path $src "*") $dest -Recurse -Force -Exclude ".gitkeep"
-        Write-Host "  Copied $kind"
+        $label = $kind.Substring(0, $kind.Length - 1)
+        foreach ($item in $items) {
+            Copy-Item $item.FullName $dest -Recurse -Force
+            $name = [System.IO.Path]::GetFileNameWithoutExtension($item.Name)
+            Write-Host "  $label '$name' installed"
+        }
     } else {
-        Write-Host "  Skipped $kind (nothing in repo yet)"
+        Write-Host "  no $kind in repo yet"
     }
 }
 
