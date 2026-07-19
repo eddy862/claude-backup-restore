@@ -22,7 +22,7 @@ $claudeJsonPath = Join-Path $env:USERPROFILE ".claude.json"
 
 Write-Host "Pulling Claude Code config from $claudeDir into the repo ..."
 
-Write-Host "`n[1/4] settings.json"
+Write-Host "`n[1/3] settings.json"
 $settingsDest = Join-Path $repoClaudeDir "settings.json"
 Copy-Item (Join-Path $claudeDir "settings.json") $settingsDest -Force
 $settings = Get-Content $settingsDest -Raw | ConvertFrom-Json
@@ -32,18 +32,7 @@ foreach ($plugin in $settings.enabledPlugins.PSObject.Properties) {
     }
 }
 
-Write-Host "`n[2/4] plugin marketplaces"
-$marketplacesSrc = Join-Path $claudeDir "plugins\known_marketplaces.json"
-if (Test-Path $marketplacesSrc) {
-    $marketplacesDest = Join-Path $repoClaudeDir "plugins\known_marketplaces.json"
-    Copy-Item $marketplacesSrc $marketplacesDest -Force
-    $marketplaces = Get-Content $marketplacesDest -Raw | ConvertFrom-Json
-    foreach ($marketplace in $marketplaces.PSObject.Properties) {
-        Write-Host "  marketplace '$($marketplace.Name)' backed up"
-    }
-}
-
-Write-Host "`n[3/4] custom skills / agents / commands"
+Write-Host "`n[2/3] custom skills / agents / commands"
 foreach ($kind in @("skills", "agents", "commands")) {
     $src = Join-Path $claudeDir $kind
     $dest = Join-Path $repoClaudeDir $kind
@@ -65,7 +54,7 @@ foreach ($kind in @("skills", "agents", "commands")) {
     }
 }
 
-Write-Host "`n[4/4] MCP servers (exporting from ~/.claude.json)"
+Write-Host "`n[3/3] MCP servers (exporting from ~/.claude.json)"
 $mergeScript = Join-Path $PSScriptRoot "sync-mcp-servers.js"
 $repoMcpPath = Join-Path $repoClaudeDir "mcp-servers.json"
 $node = Get-Command node -ErrorAction SilentlyContinue

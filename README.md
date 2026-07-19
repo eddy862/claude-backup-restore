@@ -39,8 +39,8 @@ state and is intentionally not tracked here.
 2. Clone this repo and run the restore script:
 
    ```powershell
-   git clone <this-repo-url>
-   cd claude-config
+   git clone https://github.com/eddy862/claude-backup-restore.git
+   cd claude-backup-restore
    powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
    ```
 

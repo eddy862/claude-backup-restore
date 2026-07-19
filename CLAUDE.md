@@ -13,7 +13,6 @@ build, no tests, and no runtime beyond the two PowerShell scripts.
 ```
 claude/
   settings.json              -> ~/.claude/settings.json (enabledPlugins, theme, autoUpdatesChannel)
-  plugins/known_marketplaces.json -> ~/.claude/plugins/known_marketplaces.json
   mcp-servers.json            -> merged into the "mcpServers" key of ~/.claude.json
   skills/                     -> ~/.claude/skills (custom user-level skills; empty for now)
   agents/                     -> ~/.claude/agents (custom user-level subagents; empty for now)
@@ -26,15 +25,25 @@ scripts/
 
 `claude/` mirrors the parts of `~/.claude` worth version-controlling. Anything
 not listed above (`.credentials.json`, `history.jsonl`, `cache/`, `projects/`,
-`sessions/`, plugin install caches, etc.) is machine/account state and is
-intentionally not tracked here.
+`sessions/`, plugin install caches, `plugins/known_marketplaces.json`, etc.)
+is machine/account state and is intentionally not tracked here.
+
+`plugins/known_marketplaces.json` is deliberately excluded even though it's a
+config file, not a cache: Claude Code writes an `installLocation` and
+`lastUpdated` into each entry only after it actually clones that marketplace.
+A version of this file captured/restored without those fields reads as
+corrupted to Claude Code (`/plugin` throws "Marketplace configuration file is
+corrupted"). Re-adding a marketplace with `/plugin marketplace add <repo>`
+after install regenerates a valid entry, so it's not worth tracking.
 
 ## Workflow
 
 - **New device**: clone the repo, run `scripts/install.ps1`, start `claude`
-  once so it fetches the enabled plugins from their marketplace, then log
-  back into the claude.ai connectors (ArkWiki, Atlassian, Linear, etc.) —
-  those are OAuth/account-linked, not files, so this repo can't restore them.
+  once, run `/plugin marketplace add <repo>` for each marketplace you use
+  (e.g. `anthropics/claude-plugins-official`) so it fetches the enabled
+  plugins, then log back into the claude.ai connectors (ArkWiki, Atlassian,
+  Linear, etc.) — those are OAuth/account-linked, not files, so this repo
+  can't restore them.
 - **After changing config on a machine** (enabling a plugin, adding an MCP
   server, adding a custom skill/agent/command): run `scripts/backup.ps1`,
   review the diff, then commit and push.
