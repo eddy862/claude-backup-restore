@@ -1,0 +1,9 @@
+# Never commit secrets, even by accident
+.credentials.json
+*.credentials.json
+*.token
+*.env
+.env*
+
+# Backup files created by scripts/install.ps1 and scripts/backup.ps1
+*.bak-*
